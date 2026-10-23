@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#14291f">
+  <title>Sara · Gimnasio</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="Sara gimnasio, inicio"><span class="brand-mark">S</span> SARA<span class="brand-sub">GYM STUDIO</span></a>
+    <p class="nav-label">TU ESPACIO DE ENTRENAMIENTO</p>
+    <nav aria-label="Secciones"><button class="nav-btn active" data-view="rutinas">▦ <span>Mis rutinas</span></button><button class="nav-btn" data-view="ejercicios">↗ <span>Ejercicios</span></button></nav>
+    <div class="sidebar-note"><span class="small-dot"></span> Cada repetición cuenta.<p>Diseña tu plan.<br>Construye tu mejor versión.</p></div>
+    <div class="profile"><span class="avatar">SA</span><div>Gimnasio Sara<small>Panel de entrenamiento</small></div></div>
+  </aside>
+  <main>
+    <header class="topbar"><span>Workspace <span class="crumb">/ Entrenamiento</span></span><span id="connection" class="status">Conectando…</span></header>
+    <section class="hero"><div><span class="eyebrow">CONSTANCIA, FUERZA Y PROGRESO</span><h1>Tu próximo nivel<br>empieza aquí<span>.</span></h1><p>Organiza tus ejercicios y crea rutinas que se muevan contigo.</p><button class="button light" id="hero-create">Crear una rutina <span>↗</span></button></div><div class="hero-art" aria-hidden="true"><div class="ring ring-one"></div><div class="ring ring-two"></div><div class="weight"><i></i><b></b><i></i></div><span class="art-label">MOVE WITH PURPOSE</span><span class="art-number">01 / ∞</span></div></section>
+    <section class="stats" aria-label="Resumen"><article><span>Rutinas creadas</span><strong id="stat-routines">—</strong><small>Planes hechos a tu medida</small></article><article><span>Biblioteca de ejercicios</span><strong id="stat-exercises">—</strong><small>Tu base para seguir creciendo</small></article><article><span>Minutos planificados</span><strong id="stat-minutes">—</strong><small>La suma de todas tus rutinas</small></article></section>
+    <section class="library"><div class="section-heading"><div><span class="eyebrow">ENTRENA A TU MANERA</span><h2 id="section-title">Mis rutinas</h2></div><button id="create" class="button primary">+ Nueva rutina</button></div><div class="toolbar"><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Buscar por nombre…" aria-label="Buscar por nombre"></label><span id="result-count"></span></div><div id="cards" class="cards" aria-live="polite"></div></section>
+    <footer>SARA GYM STUDIO <span>Un paso más cerca de tu mejor versión.</span></footer>
+  </main>
+  <dialog id="editor"><form id="editor-form"><div class="dialog-heading"><div><span class="eyebrow">TU ENTRENAMIENTO</span><h2 id="editor-title">Nueva rutina</h2></div><button type="button" class="icon-button" id="close-editor" aria-label="Cerrar">×</button></div><input type="hidden" id="record-id"><label>Nombre<input id="nombre" required maxlength="100" placeholder="Ej. Fuerza de tren superior"></label><label>Descripción<textarea id="descripcion" required maxlength="1000" rows="3" placeholder="Describe tu objetivo o la técnica del ejercicio"></textarea></label><div id="routine-fields"><div class="form-row"><label>Nivel<select id="nivel"><option value="PRINCIPIANTE">Principiante</option><option value="INTERMEDIO">Intermedio</option><option value="AVANZADO">Avanzado</option></select></label><label>Duración (minutos)<input id="duracion" type="number" min="1" max="600" value="45"></label></div><fieldset><legend>Ejercicios de esta rutina</legend><p class="field-help">Puedes usar el mismo ejercicio en varias rutinas.</p><div id="exercise-options"></div></fieldset></div><div id="exercise-fields" hidden><label>Grupo muscular<input id="grupo" maxlength="80" placeholder="Ej. Piernas"></label><label>Equipo<input id="equipo" maxlength="100" placeholder="Ej. Mancuernas o peso corporal"></label></div><p id="form-error" role="alert"></p><div class="dialog-actions"><button type="button" id="cancel-editor" class="button secondary">Cancelar</button><button type="submit" class="button primary" id="save">Guardar</button></div></form></dialog>
+  <dialog id="delete-dialog"><form method="dialog"><span class="eyebrow">ELIMINAR REGISTRO</span><h2>¿Confirmas la eliminación?</h2><p id="delete-description"></p><p id="delete-error" role="alert"></p><div class="dialog-actions"><button class="button secondary" value="cancel">Cancelar</button><button type="button" id="confirm-delete" class="button danger">Eliminar</button></div></form></dialog>
+  <div id="toast" role="status" hidden></div>
+</body></html>

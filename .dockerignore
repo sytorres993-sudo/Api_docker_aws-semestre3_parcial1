@@ -1,0 +1,15 @@
+.git
+.idea
+target
+.env
+.env.*
+!.env.example
+*.log
+postman
+docs
+*.pem
+*.ppk
+*.key
+**/.env
+**/.env.*
+deploy/artifacts

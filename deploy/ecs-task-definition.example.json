@@ -1,0 +1,31 @@
+{
+  "family": "gimnasio-sara",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "runtimePlatform": {"cpuArchitecture": "X86_64", "operatingSystemFamily": "LINUX"},
+  "containerDefinitions": [
+    {
+      "name": "gimnasio-sara",
+      "image": "ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/gimnasio-sara:1.0.0",
+      "essential": true,
+      "portMappings": [{"containerPort": 8080, "protocol": "tcp"}],
+      "environment": [
+        {"name": "PORT", "value": "8080"},
+        {"name": "DB_URL", "value": "jdbc:postgresql://RDS_ENDPOINT:5432/gimnasio?sslmode=require"},
+        {"name": "DB_USER", "value": "gimnasio"}
+      ],
+      "secrets": [{"name": "DB_PASSWORD", "valueFrom": "arn:aws:secretsmanager:us-east-1:ACCOUNT_ID:secret:REPLACE_ME"}],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "wget -q -T 8 -O /dev/null http://127.0.0.1:8080/actuator/health || exit 1"],
+        "interval": 30, "timeout": 10, "retries": 3, "startPeriod": 120
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {"awslogs-group": "/ecs/gimnasio-sara", "awslogs-region": "us-east-1", "awslogs-stream-prefix": "ecs"}
+      }
+    }
+  ]
+}

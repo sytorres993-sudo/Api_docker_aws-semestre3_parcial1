@@ -1,0 +1,763 @@
+{
+  "info": {
+    "name": "Gimnasio Sara · Despliegue AWS",
+    "description": "Ejecutar la colección completa en orden. Crea sus propios registros, verifica CRUD y N:N y los elimina al final. baseUrl está configurada como http://localhost:8080 para el puerto actual de Docker Compose. Para AWS, reemplázala por la URL pública real del despliegue, sin / final. Si la ejecución se interrumpe, pueden quedar los registros de prueba.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "ejercicioA",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ejercicioB",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "rutinaA",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "rutinaB",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 · Salud del despliegue",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/actuator/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Base de datos disponible\", () => pm.expect(pm.response.json().status).to.eql(\"UP\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 · Frontend publicado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"HTML del gimnasio\", () => pm.expect(pm.response.text()).to.include(\"SARA\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 · Crear ejercicio A",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/ejercicios",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Sentadilla Postman {{$timestamp}}\",\n  \"descripcion\": \"Prueba de despliegue AWS\",\n  \"grupoMuscular\": \"Piernas\",\n  \"equipo\": \"Peso corporal\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"ejercicioA\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 · Crear ejercicio B",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/ejercicios",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Plancha Postman {{$timestamp}}\",\n  \"descripcion\": \"Prueba de despliegue AWS\",\n  \"grupoMuscular\": \"Core\",\n  \"equipo\": \"Peso corporal\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"ejercicioB\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 · Listar ejercicios",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/ejercicios"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Listado JSON\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 · Consultar ejercicio A",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/ejercicios/{{ejercicioA}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 · Actualizar ejercicio A",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/ejercicios/{{ejercicioA}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Sentadilla actualizada\",\n  \"descripcion\": \"Prueba de despliegue AWS\",\n  \"grupoMuscular\": \"Piernas\",\n  \"equipo\": \"Peso corporal\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Nombre actualizado\", () => pm.expect(pm.response.json().nombre).to.eql(\"Sentadilla actualizada\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 · Crear rutina A con dos ejercicios",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/rutinas",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Rutina Postman {{$timestamp}}\",\n  \"descripcion\": \"Prueba N:N en despliegue\",\n  \"nivel\": \"PRINCIPIANTE\",\n  \"duracionMinutos\": 45,\n  \"ejercicioIds\": [\n    \"{{ejercicioA}}\",\n    \"{{ejercicioB}}\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Dos ejercicios asociados\", () => pm.expect(pm.response.json().ejercicios).to.have.lengthOf(2));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"rutinaA\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 · Crear rutina B compartiendo ejercicio A",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/rutinas",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Rutina Postman {{$timestamp}}\",\n  \"descripcion\": \"Prueba N:N en despliegue\",\n  \"nivel\": \"PRINCIPIANTE\",\n  \"duracionMinutos\": 45,\n  \"ejercicioIds\": [\n    \"{{ejercicioA}}\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"rutinaB\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 · Verificar relación N:N",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/ejercicios/{{ejercicioA}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Ejercicio compartido entre dos rutinas\", () => { const ids = pm.response.json().rutinaIds; pm.expect(ids).to.include(Number(pm.collectionVariables.get(\"rutinaA\"))); pm.expect(ids).to.include(Number(pm.collectionVariables.get(\"rutinaB\"))); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 · Listar rutinas",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/rutinas"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Listado JSON\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 · Consultar rutina A",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/rutinas/{{rutinaA}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 · Actualizar rutina B y reemplazar asociaciones",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/rutinas/{{rutinaB}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Rutina Postman {{$timestamp}}\",\n  \"descripcion\": \"Prueba N:N en despliegue\",\n  \"nivel\": \"INTERMEDIO\",\n  \"duracionMinutos\": 60,\n  \"ejercicioIds\": [\n    \"{{ejercicioB}}\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Duración actualizada\", () => pm.expect(pm.response.json().duracionMinutos).to.eql(60));",
+              "pm.test(\"Asociaciones reemplazadas\", () => { const exercises = pm.response.json().ejercicios; pm.expect(exercises).to.have.lengthOf(1); pm.expect(exercises[0].id).to.eql(Number(pm.collectionVariables.get(\"ejercicioB\"))); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14 · Asociar ejercicio A a rutina B",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": "{{baseUrl}}/api/rutinas/{{rutinaB}}/ejercicios/{{ejercicioA}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15 · Repetir asociación sin duplicados",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": "{{baseUrl}}/api/rutinas/{{rutinaB}}/ejercicios/{{ejercicioA}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Relación sin duplicados\", () => pm.expect(pm.response.json().ejercicios).to.have.lengthOf(2));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16 · Desasociar ejercicio A de rutina B",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/api/rutinas/{{rutinaB}}/ejercicios/{{ejercicioA}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17 · Verificar desasociación",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/rutinas/{{rutinaB}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Permanece ejercicio B\", () => { const exercises = pm.response.json().ejercicios; pm.expect(exercises).to.have.lengthOf(1); pm.expect(exercises[0].id).to.eql(Number(pm.collectionVariables.get(\"ejercicioB\"))); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "18 · Rechazar ejercicio inválido",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/ejercicios",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \" \",\n  \"descripcion\": \"Prueba de despliegue AWS\",\n  \"grupoMuscular\": \"Piernas\",\n  \"equipo\": \"Peso corporal\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "19 · Rechazar duración inválida",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/rutinas",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Rutina Postman {{$timestamp}}\",\n  \"descripcion\": \"Prueba N:N en despliegue\",\n  \"nivel\": \"PRINCIPIANTE\",\n  \"duracionMinutos\": 0,\n  \"ejercicioIds\": []\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "20 · Rechazar nivel inválido",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/rutinas",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Rutina Postman {{$timestamp}}\",\n  \"descripcion\": \"Prueba N:N en despliegue\",\n  \"nivel\": \"OTRO\",\n  \"duracionMinutos\": 45,\n  \"ejercicioIds\": []\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "21 · Rechazar referencia inexistente",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/rutinas/{{rutinaA}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Rutina Postman {{$timestamp}}\",\n  \"descripcion\": \"Prueba N:N en despliegue\",\n  \"nivel\": \"PRINCIPIANTE\",\n  \"duracionMinutos\": 45,\n  \"ejercicioIds\": [\n    2147483647\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "22 · Verificar rollback de asociaciones",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/rutinas/{{rutinaA}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Los dos ejercicios se conservaron\", () => pm.expect(pm.response.json().ejercicios).to.have.lengthOf(2));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "23 · Eliminar rutina A",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/api/rutinas/{{rutinaA}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "24 · Los ejercicios se conservan",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/ejercicios/{{ejercicioA}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "25 · Eliminar ejercicio B asociado",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/api/ejercicios/{{ejercicioB}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "26 · La rutina B se conserva sin ejercicio B",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/rutinas/{{rutinaB}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Rutina vacía conservada\", () => pm.expect(pm.response.json().ejercicios).to.have.lengthOf(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "27 · Confirmar ejercicio eliminado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/ejercicios/{{ejercicioB}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "28 · Eliminar rutina B",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/api/rutinas/{{rutinaB}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "29 · Eliminar ejercicio A",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/api/ejercicios/{{ejercicioA}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "30 · Confirmar rutina eliminada",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/rutinas/{{rutinaB}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
